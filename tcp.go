@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	modules.Register("k6/x/tcp", new(TCP))
+	modules.Register("k6/x/tcpx", new(TCP))
 }
 
 type TCP struct{}
