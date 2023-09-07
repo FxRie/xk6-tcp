@@ -1,4 +1,4 @@
-module github.com/NAlexandrov/xk6-tcp
+module github.com/FxRie/xk6-tcp
 
 go 1.19
 
