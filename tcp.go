@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"net"
+	// "net/TCPConn"
 	"go.k6.io/k6/js/modules"
 	// "io"
 	// "bufio"
@@ -13,8 +14,9 @@ func init() {
 
 type TCP struct{}
 
-func (tcp *TCP) Connect(addr string) (net.Conn, error) {
-	conn, err := net.Dial("tcp", addr)
+func (tcp *TCP) Connect(address string) (*net.TCPConn, error) {
+	addr, err := net.ResolveTCPAddr("tcp", address)
+	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +24,7 @@ func (tcp *TCP) Connect(addr string) (net.Conn, error) {
 	return conn, nil
 }
 
-func (tcp *TCP) Write(conn net.Conn, data []byte) error {
+func (tcp *TCP) Write(conn *net.TCPConn, data []byte) error {
 	_, err := conn.Write(data)
 	if err != nil {
 		return err
@@ -31,7 +33,7 @@ func (tcp *TCP) Write(conn net.Conn, data []byte) error {
 	return nil
 }
 
-func (tcp *TCP) Read(conn net.Conn, size int) ([]byte, error) {
+func (tcp *TCP) Read(conn *net.TCPConn, size int) ([]byte, error) {
 	buf := make([]byte, size)
 	_, err := conn.Read(buf)
 	if err != nil {
@@ -59,11 +61,15 @@ func (tcp *TCP) Read(conn net.Conn, size int) ([]byte, error) {
 // 	return buffer.String(), nil
 // }
 
-func (tcp *TCP) WriteLn(conn net.Conn, data []byte, delim []byte) error {
+func (tcp *TCP) WriteBytesLn(conn *net.TCPConn, data []byte, delim []byte) error {
 	return tcp.Write(conn, append(data, delim...))
 }
 
-func (tcp *TCP) Close(conn net.Conn) error {
+func (tcp *TCP) WriteLn(conn *net.TCPConn, data string, delim string) error {
+	return tcp.Write(conn, append([]byte(data), []byte(delim)...))
+}
+
+func (tcp *TCP) Close(conn *net.TCPConn) error {
 	err := conn.Close()
 	if err != nil {
 		return err
@@ -71,7 +77,7 @@ func (tcp *TCP) Close(conn net.Conn) error {
 	return nil
 }
 
-func (tcp *TCP) CloseWrite(conn net.Conn) error {
+func (tcp *TCP) CloseWrite(conn *net.TCPConn) error {
 	err := conn.CloseWrite()
 	if err != nil {
 		return err
@@ -79,7 +85,7 @@ func (tcp *TCP) CloseWrite(conn net.Conn) error {
 	return nil
 }
 
-func (tcp *TCP) CloseRead(conn net.Conn) error {
+func (tcp *TCP) CloseRead(conn *net.TCPConn) error {
 	err := conn.CloseRead()
 	if err != nil {
 		return err
