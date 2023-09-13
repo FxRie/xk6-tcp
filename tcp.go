@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	k6modules.Register("k6/x/tcpx", new(TCP))
+	k6modules.Register("k6/x/tcpx", New())
 }
 
 type (
@@ -21,8 +21,6 @@ type (
 
 	// ModuleInstance represents an instance of the JS module.
 	ModuleInstance struct {
-		// vu provides methods for accessing internal k6 objects for a VU
-		vu k6modules.VU
 		// comparator is the exported type
 		tcp *TCP
 	}
