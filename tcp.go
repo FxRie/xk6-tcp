@@ -29,7 +29,7 @@ func (tcp *TCP) Connect(address string) (*net.TCPConn, error) {
 }
 
 func (tcp *TCP) Write(conn *net.TCPConn, data []byte) error {
-	writeByteCount, err := conn.Write(data)
+	_, err := conn.Write(data)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (tcp *TCP) Write(conn *net.TCPConn, data []byte) error {
 					Metric: dataSendMetric,
 					Tags:   state.Tags.GetCurrentValues().Tags,
 				},
-				Value: float64(writeByteCount),
+				Value: float64(len(data)),
 				Time:  time.Now().UTC(),
 			},
 		},
@@ -54,7 +54,7 @@ func (tcp *TCP) Write(conn *net.TCPConn, data []byte) error {
 
 func (tcp *TCP) Read(conn *net.TCPConn, size int) ([]byte, error) {
 	buf := make([]byte, size)
-	readByteCount, err := conn.Read(buf)
+	_, err := conn.Read(buf)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (tcp *TCP) Read(conn *net.TCPConn, size int) ([]byte, error) {
 					Metric: dataReceiveMetric,
 					Tags:   state.Tags.GetCurrentValues().Tags,
 				},
-				Value: float64(readByteCount),
+				Value: float64(len(buf)),
 				Time:  time.Now().UTC(),
 			},
 		},
