@@ -36,12 +36,17 @@ func (tcp *TCP) Write(conn *net.TCPConn, data []byte) error {
 
 	state := tcp.vu.State()
 	dataSendMetric := state.BuiltinMetrics.DataSent
-	state.BuiltinMetrics.DataSent.Sink.Add(k6metrics.Sample{
-		TimeSeries: k6metrics.TimeSeries{
-			Metric: dataSendMetric,
-			Tags:   state.Tags.GetCurrentValues().Tags},
-		Value: float64(writeByteCount),
-		Time:  time.Now().UTC(),
+	k6metrics.PushIfNotDone(tcp.vu.Context(), state.Samples, k6metrics.ConnectedSamples{
+		Samples: []k6metrics.Sample{
+			{
+				TimeSeries: k6metrics.TimeSeries{
+					Metric: dataSendMetric,
+					Tags:   state.Tags.GetCurrentValues().Tags,
+				},
+				Value: float64(writeByteCount),
+				Time:  time.Now().UTC(),
+			},
+		},
 	})
 
 	return nil
@@ -55,13 +60,18 @@ func (tcp *TCP) Read(conn *net.TCPConn, size int) ([]byte, error) {
 	}
 
 	state := tcp.vu.State()
-	dataReceiveMetric := state.BuiltinMetrics.DataSent
-	state.BuiltinMetrics.DataReceived.Sink.Add(k6metrics.Sample{
-		TimeSeries: k6metrics.TimeSeries{
-			Metric: dataReceiveMetric,
-			Tags:   state.Tags.GetCurrentValues().Tags},
-		Value: float64(readByteCount),
-		Time:  time.Now().UTC(),
+	dataReceiveMetric := state.BuiltinMetrics.DataReceived
+	k6metrics.PushIfNotDone(tcp.vu.Context(), state.Samples, k6metrics.ConnectedSamples{
+		Samples: []k6metrics.Sample{
+			{
+				TimeSeries: k6metrics.TimeSeries{
+					Metric: dataReceiveMetric,
+					Tags:   state.Tags.GetCurrentValues().Tags,
+				},
+				Value: float64(readByteCount),
+				Time:  time.Now().UTC(),
+			},
+		},
 	})
 
 	return buf, nil
