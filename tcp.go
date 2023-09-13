@@ -42,7 +42,6 @@ func New() *RootModule {
 // NewModuleInstance implements the modules.Module interface returning a new instance for each VU.
 func (*RootModule) NewModuleInstance(vu k6modules.VU) k6modules.Instance {
 	return &ModuleInstance{
-		vu:  vu,
 		tcp: &TCP{vu: vu},
 	}
 }
@@ -77,7 +76,7 @@ func (tcp *TCP) Write(conn *net.TCPConn, data []byte) error {
 
 	state := tcp.vu.State()
 	dataSendMetric := state.BuiltinMetrics.DataSent
-	dataSendMetric.Sink.Add(
+	k6metrics.PushIfNotDone(tcp.vu.Context(), state.Samples, k6metrics.Samples{
 		k6metrics.Sample{
 			TimeSeries: k6metrics.TimeSeries{
 				Metric: dataSendMetric,
@@ -85,7 +84,8 @@ func (tcp *TCP) Write(conn *net.TCPConn, data []byte) error {
 			},
 			Value: float64(byteCount),
 			Time:  time.Now().UTC(),
-		})
+		},
+	})
 
 	return nil
 }
@@ -99,7 +99,7 @@ func (tcp *TCP) Read(conn *net.TCPConn, size int) ([]byte, error) {
 
 	state := tcp.vu.State()
 	dataReceiveMetric := state.BuiltinMetrics.DataReceived
-	dataReceiveMetric.Sink.Add(
+	k6metrics.PushIfNotDone(tcp.vu.Context(), state.Samples, k6metrics.Samples{
 		k6metrics.Sample{
 			TimeSeries: k6metrics.TimeSeries{
 				Metric: dataReceiveMetric,
@@ -108,7 +108,7 @@ func (tcp *TCP) Read(conn *net.TCPConn, size int) ([]byte, error) {
 			Value: float64(size),
 			Time:  time.Now().UTC(),
 		},
-	)
+	})
 
 	return buf, nil
 }
