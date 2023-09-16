@@ -1,7 +1,6 @@
 package tcp
 
 import (
-	"errors"
 	"net"
 	"time"
 
@@ -53,32 +52,22 @@ func (mi *ModuleInstance) Exports() k6modules.Exports {
 }
 
 type TCP struct {
-	vu   k6modules.VU
-	conn *net.TCPConn
+	vu k6modules.VU
 }
 
-func (tcp *TCP) Connect(address string) error {
+func (tcp *TCP) Connect(address string) (*net.TCPConn, error) {
 	addr, err := net.ResolveTCPAddr("tcp", address)
-	if err != nil {
-		return err
-	}
-
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	tcp.conn = conn
-	return nil
+	return conn, nil
 }
 
-func (tcp *TCP) Write(data []byte) error {
-	if tcp.conn == nil {
-		return errors.New("The connection is not established and has to be initialized with the 'Connect' function")
-	}
-
+func (tcp *TCP) Write(conn *net.TCPConn, data []byte) error {
 	byteCount := len(data)
-	_, err := tcp.conn.Write(data)
+	_, err := conn.Write(data)
 	if err != nil {
 		return err
 	}
@@ -101,13 +90,9 @@ func (tcp *TCP) Write(data []byte) error {
 	return nil
 }
 
-func (tcp *TCP) Read(size int) ([]byte, error) {
-	if tcp.conn == nil {
-		return nil, errors.New("The connection is not established and has to be initialized with the 'Connect' function")
-	}
-
+func (tcp *TCP) Read(conn *net.TCPConn, size int) ([]byte, error) {
 	buf := make([]byte, size)
-	_, err := tcp.conn.Read(buf)
+	_, err := conn.Read(buf)
 	if err != nil {
 		return nil, err
 	}
@@ -130,44 +115,32 @@ func (tcp *TCP) Read(size int) ([]byte, error) {
 	return buf, nil
 }
 
-func (tcp *TCP) WriteBytesLn(data []byte, delim []byte) error {
-	return tcp.Write(append(data, delim...))
+func (tcp *TCP) WriteBytesLn(conn *net.TCPConn, data []byte, delim []byte) error {
+	return tcp.Write(conn, append(data, delim...))
 }
 
-func (tcp *TCP) WriteLn(data string, delim string) error {
-	return tcp.Write(append([]byte(data), []byte(delim)...))
+func (tcp *TCP) WriteLn(conn *net.TCPConn, data string, delim string) error {
+	return tcp.Write(conn, append([]byte(data), []byte(delim)...))
 }
 
-func (tcp *TCP) Close() error {
-	if tcp.conn == nil {
-		return errors.New("There is no connection to close.")
-	}
-
-	err := tcp.conn.Close()
+func (tcp *TCP) Close(conn *net.TCPConn) error {
+	err := conn.Close()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (tcp *TCP) CloseWrite() error {
-	if tcp.conn == nil {
-		return errors.New("There is no connection to close.")
-	}
-
-	err := tcp.conn.CloseWrite()
+func (tcp *TCP) CloseWrite(conn *net.TCPConn) error {
+	err := conn.CloseWrite()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (tcp *TCP) CloseRead() error {
-	if tcp.conn == nil {
-		return errors.New("There is no connection to close.")
-	}
-
-	err := tcp.conn.CloseRead()
+func (tcp *TCP) CloseRead(conn *net.TCPConn) error {
+	err := conn.CloseRead()
 	if err != nil {
 		return err
 	}
