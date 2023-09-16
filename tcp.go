@@ -57,11 +57,15 @@ type TCP struct {
 
 func (tcp *TCP) Connect(address string) (*net.TCPConn, error) {
 	addr, err := net.ResolveTCPAddr("tcp", address)
-	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
 		return nil, err
 	}
 
+	conn, err := net.DialTCP("tcp", nil, addr)
+	if err != nil {
+		return nil, err
+	}
+	conn.SetLinger(0)
 	return conn, nil
 }
 
