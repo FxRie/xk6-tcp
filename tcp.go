@@ -75,7 +75,7 @@ func (tcp *TCP) SetDeadlineToInfinite(conn *net.TCPConn) error {
 	return conn.SetDeadline(time.Time{})
 }
 
-func (tcp *TCP) KeepAlive(conn *net.TCPConn, shouldSendKeepAlive bool) error {
+func (tcp *TCP) SetKeepAlive(conn *net.TCPConn, shouldSendKeepAlive bool) error {
 	return conn.SetKeepAlive(shouldSendKeepAlive)
 }
 
