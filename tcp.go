@@ -55,13 +55,15 @@ type TCP struct {
 	vu k6modules.VU
 }
 
-func (tcp *TCP) Connect(address string) (*net.TCPConn, error) {
-	addr, err := net.ResolveTCPAddr("tcp", address)
+// Viable values for the tcp type are the ones in golang net.Tcp
+// "tcp", "tcp4", "tcp6", "" => will fallback to "tcp" then
+func (tcp *TCP) Connect(tcpType string, address string) (*net.TCPConn, error) {
+	addr, err := net.ResolveTCPAddr(tcpType, address)
 	if err != nil {
 		return nil, err
 	}
 
-	conn, err := net.DialTCP("tcp4", nil, addr)
+	conn, err := net.DialTCP(tcpType, nil, addr)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +71,7 @@ func (tcp *TCP) Connect(address string) (*net.TCPConn, error) {
 	return conn, nil
 }
 
-func (tcp *TCP) SetDeadlineToInfinite(conn *net.TCPConn, shouldSendKeepAlive bool) error {
+func (tcp *TCP) SetDeadlineToInfinite(conn *net.TCPConn) error {
 	return conn.SetDeadline(time.Time{})
 }
 
