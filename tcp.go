@@ -69,6 +69,14 @@ func (tcp *TCP) Connect(address string) (*net.TCPConn, error) {
 	return conn, nil
 }
 
+func (tcp *TCP) SetDeadlineToInfinite(conn *net.TCPConn, shouldSendKeepAlive bool) error {
+	return conn.SetDeadline(time.Time{})
+}
+
+func (tcp *TCP) KeepAlive(conn *net.TCPConn, shouldSendKeepAlive bool) error {
+	return conn.SetKeepAlive(shouldSendKeepAlive)
+}
+
 func (tcp *TCP) Write(conn *net.TCPConn, data []byte) error {
 	byteCount := len(data)
 	_, err := conn.Write(data)
